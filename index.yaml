@@ -3,6 +3,16 @@ entries:
   friendly-octo-guacamole:
   - apiVersion: v2
     appVersion: 1.16.0
+    created: "2025-12-06T10:18:02.338723652Z"
+    description: A Helm chart for Kubernetes
+    digest: 71a1462c9449a069896bf26d947d5b31abb0d0b4935a9fb110069095466a6baa
+    name: friendly-octo-guacamole
+    type: application
+    urls:
+    - https://github.com/erdincakgun/friendly-octo-guacamole/releases/download/friendly-octo-guacamole-1.2.0/friendly-octo-guacamole-1.2.0.tgz
+    version: 1.2.0
+  - apiVersion: v2
+    appVersion: 1.16.0
     created: "2025-12-06T09:11:05.025421792Z"
     description: A Helm chart for Kubernetes
     digest: 68baaa3e35c6eca7124fc7683f85dd77f206a7f6a601dbb27e4df89af0a38419
@@ -11,4 +21,4 @@ entries:
     urls:
     - https://github.com/erdincakgun/friendly-octo-guacamole/releases/download/friendly-octo-guacamole-0.1.0/friendly-octo-guacamole-0.1.0.tgz
     version: 0.1.0
-generated: "2025-12-06T09:11:05.025428095Z"
+generated: "2025-12-06T10:18:02.338731306Z"
