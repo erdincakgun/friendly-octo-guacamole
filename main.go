@@ -46,34 +46,48 @@ func NewServer() *Server {
 	}
 }
 
-func writeJSON(w http.ResponseWriter, status int, v interface{}) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-
-	if err := json.NewEncoder(w).Encode(v); err != nil {
+func writeJSON(w http.ResponseWriter, status int, v interface{}) error {
+	data, err := json.Marshal(v)
+	if err != nil {
 		log.Error().
 			Err(err).
 			Int("status", status).
-			Msg("Failed to encode JSON response")
+			Msg("Failed to marshal JSON response")
+
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return err
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	w.Write(data)
+
+	return nil
 }
 
 func writeError(w http.ResponseWriter, status int, message string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-
 	errorResponse := map[string]string{
 		"error":   http.StatusText(status),
 		"message": message,
 	}
 
-	if err := json.NewEncoder(w).Encode(errorResponse); err != nil {
+	data, err := json.Marshal(errorResponse)
+	if err != nil {
 		log.Error().
 			Err(err).
 			Int("status", status).
 			Str("original_message", message).
-			Msg("Failed to encode error response")
+			Msg("Failed to marshal error response, using plain text fallback")
+
+		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
+		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	w.Write(data)
 }
 
 func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
