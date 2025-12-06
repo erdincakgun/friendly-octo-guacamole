@@ -5,7 +5,28 @@ on:
       - main
   pull_request:
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      charts: ${{ steps.filter.outputs.charts }}
+      src: ${{ steps.filter.outputs.src }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            charts:
+              - 'charts/**'
+            src:
+              - 'go.mod'
+              - 'go.sum'
+              - 'Dockerfile'
   lint:
+    needs: changes
+    if: needs.changes.outputs.src == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -43,3 +64,24 @@ jobs:
             ${{ env.registry }}${{ '/' }}${{ github.repository }}${{ ':' }}${{ github.ref_name }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+  charts:
+    needs: changes
+    if: needs.changes.outputs.charts == 'true'
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Configure Git
+        run: |
+          git config user.name ${{ github.actor }}
+          git config user.email ${{ github.actor }}@users.noreply.github.com
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.7.0
+        with:
+          charts_dir: charts
+        env:
+          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
