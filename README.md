@@ -1,8 +1,7 @@
 # Friendly Octo Guacamole
 
 helmfile --environment production diff
-helmfile --environment production sync
-
+helmfile --environment production sync --skip-deps
 
 # Food Delivery Platform - SRE Interview Exercise
 
