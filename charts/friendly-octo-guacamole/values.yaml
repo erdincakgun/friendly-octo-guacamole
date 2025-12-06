@@ -121,3 +121,19 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+# This is for setting up topology spread constraints for pod distribution across zones/nodes.
+# For more information: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+topologySpreadConstraints: []
+# - maxSkew: 1
+#   topologyKey: topology.kubernetes.io/zone
+#   whenUnsatisfiable: DoNotSchedule
+#   labelSelector:
+#     matchLabels:
+#       app.kubernetes.io/name: friendly-octo-guacamole
+# - maxSkew: 1
+#   topologyKey: kubernetes.io/hostname
+#   whenUnsatisfiable: ScheduleAnyway
+#   labelSelector:
+#     matchLabels:
+#       app.kubernetes.io/name: friendly-octo-guacamole
