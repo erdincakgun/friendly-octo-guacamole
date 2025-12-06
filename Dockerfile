@@ -5,7 +5,7 @@ FROM golang:1.25-alpine AS builder
 WORKDIR /app
 
 # Copy source code
-COPY main.go .
+COPY main.go go.mod go.sum .
 
 # Build the application
 # CGO_ENABLED=0 for static binary
