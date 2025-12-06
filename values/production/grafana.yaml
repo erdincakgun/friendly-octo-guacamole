@@ -1,0 +1,17 @@
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  hosts:
+    - grafana.friendly-octo-guacamole.com
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 200m
+    memory: 256Mi
+persistence:
+  enabled: true
+  size: 1Gi
+initChownData:
+  enabled: false
