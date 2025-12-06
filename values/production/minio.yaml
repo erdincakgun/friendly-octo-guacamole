@@ -25,3 +25,13 @@ ingress:
     enabled: true
     ingressClassName: nginx
     host: minio.friendly-octo-guacamole.com
+  buckets:
+    - name: friendly-octo-guacamole-loki-chunks
+      objectLock: false
+      region: eu-central-1
+    - name: friendly-octo-guacamole-loki-ruler
+      objectLock: false
+      region: eu-central-1
+    - name: friendly-octo-guacamole-loki-admin
+      objectLock: false
+      region: eu-central-1

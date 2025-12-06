@@ -96,3 +96,14 @@ releases:
       - values/{{ .Environment.Name }}/minio.yaml
     secrets:
       - values/{{ .Environment.Name }}/minio.sops.yaml
+  - name: loki
+    needs:
+      - minio
+    namespace: central-observability
+    createNamespace: true
+    chart: grafana/loki
+    version: 6.46.0
+    values:
+      - values/{{ .Environment.Name }}/loki.yaml
+    secrets:
+      - values/{{ .Environment.Name }}/loki.sops.yaml

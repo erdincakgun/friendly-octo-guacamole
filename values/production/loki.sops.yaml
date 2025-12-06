@@ -1,0 +1,24 @@
+loki:
+  storage_config:
+    aws:
+      access_key_id: ENC[AES256_GCM,data:Cmm8MtKCEbhBEz0XjBcp7w==,iv:e2ftLtYNlKX9U0IukyVSxKFoi/ki7h8l9EpXKtMpqSA=,tag:piLDB40cPykefjs5tUm63Q==,type:str]
+      secret_access_key: ENC[AES256_GCM,data:ToLiG1V1MOqml1JS5EBMZA==,iv:DUIky4ItlvyrXUJwxiScEUB/7pfgSw5IYgLr8WmWTP4=,tag:Dgj0xxE6RtilrhE1uxWROw==,type:str]
+  storage:
+    s3:
+      secretAccessKey: ENC[AES256_GCM,data:a1kaYhUGfRGWqoh7TJFGhg==,iv:D52gV5Y8b0KaBG8omilvb++9vmZc7pp63u9Y5m06Pno=,tag:ASWybEc3+TOqjVCaS9RdCw==,type:str]
+      accessKeyId: ENC[AES256_GCM,data:+fZ9eUxEYVQpes02tKs1SQ==,iv:2V642lxBeKdNpnuNlE9d00Tva4ou96OpIrgeP+sXPMM=,tag:Y+LKQqI9QSz4aT4zuh6Mmw==,type:str]
+sops:
+  age:
+    - recipient: age1s9mjs3cmugth0lzutajzj3wn0g7u8x33070txqwxe8lutguaaquqqej33a
+      enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBhU2dad0tQTFh0ejZvdERm
+        UXo0RzFGNlorK1owRHJqRSt1cTAyL2ErSEFJCnEvRkUrVnEvNFArbGQrK04wcWQ5
+        WEEyTG9pT3M1MDlLWk83ZURqcHBNWUEKLS0tIDA5UmhrT2xvbjg2UmoxR0VOaHNy
+        L0kwMGUxcXF1MDE1TDE2SnNqbjdsSkEKD9WjIrC/xMw0SASCzFEuEgbHEXOpbwPV
+        aIki6sgvL4YVgum9ALBzxbQnFHzi26xs1aEdkpvQgiYVDHW8OwjFMQ==
+        -----END AGE ENCRYPTED FILE-----
+  lastmodified: "2025-12-06T16:07:25Z"
+  mac: ENC[AES256_GCM,data:rCz6rB7979/k2qIbTFhu72ht0q11dFiZDPFMReWMRirC9p2UkUGTfgp30T9aKcqSBM3hmzJVxqAbVR/ykBlf4ctcM7igOIIACZxipqUEwmud3BjXKD45v3iOnSOX4/YwFmkuxgAF5Ku1zm3klOAO9cEALZtrlweLU0Ueohp7yD0=,iv:LL4Z5/EQp3Jj7uoF+PRDVRxRHIVJdsXEWiB69vyOKMo=,tag:qn16tQimrbOpAZsOzTc1Fg==,type:str]
+  unencrypted_suffix: _unencrypted
+  version: 3.10.2
