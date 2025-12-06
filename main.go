@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"math/rand"
 	"net/http"
 	"os"
@@ -12,6 +11,9 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 // MenuItem represents a food item in our delivery platform
@@ -44,28 +46,6 @@ func NewServer() *Server {
 	}
 }
 
-func logJSON(level, method, path string, status int, duration time.Duration, msg string, err error, menuItemID string) {
-	entry := map[string]interface{}{
-		"timestamp":   time.Now().Format(time.RFC3339),
-		"level":       level,
-		"method":      method,
-		"path":        path,
-		"status_code": status,
-		"duration_ms": duration.Seconds() * 1000,
-		"message":     msg,
-	}
-
-	if err != nil {
-		entry["error"] = err.Error()
-	}
-	if menuItemID != "" {
-		entry["menu_item_id"] = menuItemID
-	}
-
-	data, _ := json.Marshal(entry)
-	fmt.Println(string(data))
-}
-
 func writeJSON(w http.ResponseWriter, status int, v interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
@@ -87,8 +67,12 @@ func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
 		"timestamp": time.Now().Format(time.RFC3339),
 	})
 
-	logJSON("INFO", r.Method, r.URL.Path, http.StatusOK, time.Since(start),
-		"Health check successful", nil, "")
+	log.Info().
+		Str("method", r.Method).
+		Str("path", r.URL.Path).
+		Int("status", http.StatusOK).
+		Dur("duration", time.Since(start)).
+		Msg("Health check successful")
 }
 
 func (s *Server) menuHandler(w http.ResponseWriter, r *http.Request) {
@@ -99,8 +83,14 @@ func (s *Server) menuHandler(w http.ResponseWriter, r *http.Request) {
 		status := http.StatusInternalServerError
 		writeError(w, status, "Failed to fetch menu items from restaurant database")
 
-		logJSON("ERROR", r.Method, r.URL.Path, status, time.Since(start),
-			"Failed to list menu items", fmt.Errorf("restaurant service timeout"), "")
+		log.Error().
+			Err(fmt.Errorf("restaurant service timeout")).
+			Str("method", r.Method).
+			Str("path", r.URL.Path).
+			Int("status", status).
+			Dur("duration", time.Since(start)).
+			Msg("Failed to list menu items")
+
 		return
 	}
 
@@ -114,8 +104,13 @@ func (s *Server) menuHandler(w http.ResponseWriter, r *http.Request) {
 		"count":      len(menuList),
 	})
 
-	logJSON("INFO", r.Method, r.URL.Path, http.StatusOK, time.Since(start),
-		fmt.Sprintf("Listed %d menu items", len(menuList)), nil, "")
+	log.Info().
+		Str("method", r.Method).
+		Str("path", r.URL.Path).
+		Int("status", http.StatusOK).
+		Dur("duration", time.Since(start)).
+		Int("count", len(menuList)).
+		Msg("Listed menu items")
 }
 
 func (s *Server) menuItemByIDHandler(w http.ResponseWriter, r *http.Request) {
@@ -127,8 +122,13 @@ func (s *Server) menuItemByIDHandler(w http.ResponseWriter, r *http.Request) {
 		status := http.StatusBadRequest
 		writeError(w, status, "Menu item ID is required")
 
-		logJSON("WARN", r.Method, r.URL.Path, status, time.Since(start),
-			"Invalid menu item request", fmt.Errorf("missing menu item ID"), "")
+		log.Warn().
+			Err(fmt.Errorf("missing menu item ID")).
+			Str("method", r.Method).
+			Str("path", r.URL.Path).
+			Int("status", status).
+			Dur("duration", time.Since(start)).
+			Msg("Invalid menu item request")
 		return
 	}
 
@@ -137,9 +137,14 @@ func (s *Server) menuItemByIDHandler(w http.ResponseWriter, r *http.Request) {
 		status := http.StatusNotFound
 		writeError(w, status, fmt.Sprintf("Menu item with ID '%s' not found", menuItemID))
 
-		logJSON("WARN", r.Method, r.URL.Path, status, time.Since(start),
-			fmt.Sprintf("Menu item ID %s does not exist", menuItemID),
-			fmt.Errorf("menu item not found"), menuItemID)
+		log.Warn().
+			Err(fmt.Errorf("menu item not found")).
+			Str("method", r.Method).
+			Str("path", r.URL.Path).
+			Int("status", status).
+			Dur("duration", time.Since(start)).
+			Str("menu_item_id", menuItemID).
+			Msg("Menu item ID does not exist")
 		return
 	}
 
@@ -147,12 +152,19 @@ func (s *Server) menuItemByIDHandler(w http.ResponseWriter, r *http.Request) {
 		"menu_item": menuItem,
 	})
 
-	logJSON("INFO", r.Method, r.URL.Path, http.StatusOK, time.Since(start),
-		fmt.Sprintf("Retrieved menu item: %s from %s", menuItem.Name, menuItem.Restaurant),
-		nil, menuItemID)
+	log.Info().
+		Str("method", r.Method).
+		Str("path", r.URL.Path).
+		Int("status", http.StatusOK).
+		Dur("duration", time.Since(start)).
+		Str("menu_item_id", menuItemID).
+		Str("menu_item_name", menuItem.Name).
+		Str("restaurant", menuItem.Restaurant).
+		Msg("Retrieved menu item")
 }
 
 func main() {
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	server := NewServer()
 
 	mux := http.NewServeMux()
@@ -168,11 +180,11 @@ func main() {
 		IdleTimeout:  60 * time.Second,
 	}
 
-	logJSON("INFO", "", "", 0, 0, "Starting server on :8080", nil, "")
+	log.Info().Msgf("Starting server on %s", httpServer.Addr)
 
 	go func() {
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Server failed to start: %v", err)
+			log.Fatal().Err(err).Msgf("Server failed to start")
 		}
 	}()
 
@@ -180,15 +192,14 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	logJSON("INFO", "", "", 0, 0, "Shutting down server...", nil, "")
+	log.Info().Msg("Shutting down server")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	if err := httpServer.Shutdown(ctx); err != nil {
-		logJSON("ERROR", "", "", 0, 0, "Server forced to shutdown", err, "")
-		log.Fatal("Server forced to shutdown:", err)
+		log.Fatal().Err(err).Msg("Server forced to shutdown")
 	}
 
-	logJSON("INFO", "", "", 0, 0, "Server exited gracefully", nil, "")
+	log.Info().Msg("Server exited gracefully")
 }
