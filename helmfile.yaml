@@ -19,6 +19,8 @@ repositories:
     url: https://ui.charts.kafbat.io/
   - name: minio
     url: https://operator.min.io/
+  - name: metrics-server
+    url: https://kubernetes-sigs.github.io/metrics-server/
 releases:
   - name: friendly-octo-guacamole
     namespace: "{{ .Environment.Name }}"
@@ -107,3 +109,9 @@ releases:
       - values/{{ .Environment.Name }}/loki.yaml
     secrets:
       - values/{{ .Environment.Name }}/loki.sops.yaml
+  - name: metrics-server
+    namespace: kube-system
+    chart: metrics-server/metrics-server
+    version: 3.13.0
+    values:
+      - values/{{ .Environment.Name }}/metrics-server.yaml
