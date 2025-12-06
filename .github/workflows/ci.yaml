@@ -21,6 +21,7 @@ jobs:
             charts:
               - 'charts/**'
             src:
+              - 'main.go'
               - 'go.mod'
               - 'go.sum'
               - 'Dockerfile'
