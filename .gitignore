@@ -24,3 +24,4 @@ Temporary Items
 *.test
 *.out
 go.work
+key.txt
