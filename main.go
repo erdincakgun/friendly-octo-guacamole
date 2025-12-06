@@ -16,7 +16,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// MenuItem represents a food item in our delivery platform
 type MenuItem struct {
 	ID          string  `json:"id"`
 	Name        string  `json:"name"`
@@ -28,12 +27,45 @@ type MenuItem struct {
 	PrepTime    int     `json:"prep_time_minutes"`
 }
 
-// Server holds our application state
 type Server struct {
 	menuItems map[string]MenuItem
 }
 
-// NewServer creates a new server instance with sample menu items
+type responseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (rw *responseWriter) WriteHeader(code int) {
+	rw.statusCode = code
+	rw.ResponseWriter.WriteHeader(code)
+}
+
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+
+		rw := &responseWriter{ResponseWriter: w, statusCode: http.StatusOK}
+		next.ServeHTTP(rw, r)
+
+		logger := log.Info()
+		if rw.statusCode >= 500 {
+			logger = log.Error()
+		} else if rw.statusCode >= 400 {
+			logger = log.Warn()
+		}
+
+		logger.
+			Str("method", r.Method).
+			Str("path", r.URL.Path).
+			Int("status", rw.statusCode).
+			Dur("duration", time.Since(start)).
+			Str("remote_addr", r.RemoteAddr).
+			Str("user_agent", r.UserAgent()).
+			Msg("HTTP request")
+	})
+}
+
 func NewServer() *Server {
 	return &Server{
 		menuItems: map[string]MenuItem{
@@ -60,7 +92,10 @@ func writeJSON(w http.ResponseWriter, status int, v interface{}) error {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	w.Write(data)
+	if _, err := w.Write(data); err != nil {
+		log.Error().Err(err).Msg("Failed to write response")
+		return err
+	}
 
 	return nil
 }
@@ -81,47 +116,26 @@ func writeError(w http.ResponseWriter, status int, message string) {
 
 		w.Header().Set("Content-Type", "text/plain")
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal Server Error"))
+		_, _ = w.Write([]byte("Internal Server Error"))
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	w.Write(data)
+	_, _ = w.Write(data)
 }
 
-func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
-	start := time.Now()
-
-	writeJSON(w, http.StatusOK, map[string]string{
+func (s *Server) healthHandler(w http.ResponseWriter, _ *http.Request) {
+	_ = writeJSON(w, http.StatusOK, map[string]string{
 		"status":    "healthy",
 		"timestamp": time.Now().Format(time.RFC3339),
 	})
-
-	log.Info().
-		Str("method", r.Method).
-		Str("path", r.URL.Path).
-		Int("status", http.StatusOK).
-		Dur("duration", time.Since(start)).
-		Msg("Health check successful")
 }
 
 func (s *Server) menuHandler(w http.ResponseWriter, r *http.Request) {
-	start := time.Now()
-
 	// 10% chance of simulated failure for testing monitoring
 	if rand.Float32() < 0.1 {
-		status := http.StatusInternalServerError
-		writeError(w, status, "Failed to fetch menu items from restaurant database")
-
-		log.Error().
-			Err(fmt.Errorf("restaurant service timeout")).
-			Str("method", r.Method).
-			Str("path", r.URL.Path).
-			Int("status", status).
-			Dur("duration", time.Since(start)).
-			Msg("Failed to list menu items")
-
+		writeError(w, http.StatusInternalServerError, "Failed to fetch menu items from restaurant database")
 		return
 	}
 
@@ -130,68 +144,29 @@ func (s *Server) menuHandler(w http.ResponseWriter, r *http.Request) {
 		menuList = append(menuList, item)
 	}
 
-	writeJSON(w, http.StatusOK, map[string]interface{}{
+	_ = writeJSON(w, http.StatusOK, map[string]interface{}{
 		"menu_items": menuList,
 		"count":      len(menuList),
 	})
-
-	log.Info().
-		Str("method", r.Method).
-		Str("path", r.URL.Path).
-		Int("status", http.StatusOK).
-		Dur("duration", time.Since(start)).
-		Int("count", len(menuList)).
-		Msg("Listed menu items")
 }
 
 func (s *Server) menuItemByIDHandler(w http.ResponseWriter, r *http.Request) {
-	start := time.Now()
-
 	menuItemID := strings.TrimSpace(strings.TrimPrefix(r.URL.Path, "/api/menu/"))
 
 	if menuItemID == "" {
-		status := http.StatusBadRequest
-		writeError(w, status, "Menu item ID is required")
-
-		log.Warn().
-			Err(fmt.Errorf("missing menu item ID")).
-			Str("method", r.Method).
-			Str("path", r.URL.Path).
-			Int("status", status).
-			Dur("duration", time.Since(start)).
-			Msg("Invalid menu item request")
+		writeError(w, http.StatusBadRequest, "Menu item ID is required")
 		return
 	}
 
 	menuItem, exists := s.menuItems[menuItemID]
 	if !exists {
-		status := http.StatusNotFound
-		writeError(w, status, fmt.Sprintf("Menu item with ID '%s' not found", menuItemID))
-
-		log.Warn().
-			Err(fmt.Errorf("menu item not found")).
-			Str("method", r.Method).
-			Str("path", r.URL.Path).
-			Int("status", status).
-			Dur("duration", time.Since(start)).
-			Str("menu_item_id", menuItemID).
-			Msg("Menu item ID does not exist")
+		writeError(w, http.StatusNotFound, fmt.Sprintf("Menu item with ID '%s' not found", menuItemID))
 		return
 	}
 
-	writeJSON(w, http.StatusOK, map[string]interface{}{
+	_ = writeJSON(w, http.StatusOK, map[string]interface{}{
 		"menu_item": menuItem,
 	})
-
-	log.Info().
-		Str("method", r.Method).
-		Str("path", r.URL.Path).
-		Int("status", http.StatusOK).
-		Dur("duration", time.Since(start)).
-		Str("menu_item_id", menuItemID).
-		Str("menu_item_name", menuItem.Name).
-		Str("restaurant", menuItem.Restaurant).
-		Msg("Retrieved menu item")
 }
 
 func main() {
@@ -205,7 +180,7 @@ func main() {
 
 	httpServer := &http.Server{
 		Addr:         ":8080",
-		Handler:      mux,
+		Handler:      loggingMiddleware(mux),
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  60 * time.Second,
