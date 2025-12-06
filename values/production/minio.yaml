@@ -1,0 +1,27 @@
+tenant:
+  name: minio
+  configSecret:
+    name: minio-env-configuration
+  pools:
+    - servers: 4
+      name: pool-0
+      volumesPerServer: 4
+      size: 1Gi
+      resources:
+        limits:
+          cpu: 200m
+          memory: 256Mi
+        requests:
+          cpu: 200m
+          memory: 256Mi
+  certificate:
+    requestAutoCert: false
+ingress:
+  console:
+    enabled: true
+    ingressClassName: nginx
+    host: minio-console.friendly-octo-guacamole.com
+  api:
+    enabled: true
+    ingressClassName: nginx
+    host: minio.friendly-octo-guacamole.com

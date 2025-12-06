@@ -1,0 +1,19 @@
+tenant:
+  configSecret:
+    accessKey: ENC[AES256_GCM,data:EY1wH2LBE584KST0P9CiJA==,iv:ct7y3TvWssosUxj+aYpJ3ofbubFwyZqNDtJNon3MvCo=,tag:SddiDcBrPyWnUhnEif/y3A==,type:str]
+    secretKey: ENC[AES256_GCM,data:Lj5LP52iI74J8hxUBGlU4g==,iv:SehdqvTKV9v4eNqQr79Ifd6/CuphSXGw24HHfF5Fwe0=,tag:l7I7QWVwV2k9cR9TLzRqLg==,type:str]
+sops:
+  age:
+    - recipient: age1s9mjs3cmugth0lzutajzj3wn0g7u8x33070txqwxe8lutguaaquqqej33a
+      enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBSUlk3RHdrWUVlVitUcFNl
+        UHFLdkszeTdKaTZ0Vlh1TmNNOVprbEFjOERvCjR5eTV2YUYzdHdlK1dmd2ZtTGpO
+        YlNZL0lIN2JRSUVMMndMa2lzYnRjc28KLS0tIFZYa1hPRG1SSnRQTVFCNzlPM01X
+        NDJ0TENUVm55RzBSdW5kSTFSdkdZYVEKJ1UwBxMXdbEpYu4I+j1ailyk3bBW5gDw
+        1yibcdNCpCQiTAdqYyLVfaHvBSquYZF1TPAbDeuNbaziUC3TfdHoaA==
+        -----END AGE ENCRYPTED FILE-----
+  lastmodified: "2025-12-06T14:54:05Z"
+  mac: ENC[AES256_GCM,data:dpFCWdwaTWcb8WEC13/YUEKi/UqwtP5mpXX8tO2ilMS232cng2lJLaRI7D5DEVjrZ+IT3LO6d4QzQQAsTbwMGhmXMvkjhg7snPKQa1VOv0pgZLBtELNhALjQdSteQb/ruebrut7iP9d9GmaCnQjHmZ4xhwM+MOVOEjDFEO2GKow=,iv:RmSngVoaZelGbCE+4oBGXECDHpO2RSTJrtv4OKXloq4=,tag:WmDo8TwyS8DL75ppJz4yFA==,type:str]
+  unencrypted_suffix: _unencrypted
+  version: 3.10.2

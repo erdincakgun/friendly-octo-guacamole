@@ -17,6 +17,8 @@ repositories:
     url: https://fluent.github.io/helm-charts
   - name: kafka-ui
     url: https://ui.charts.kafbat.io/
+  - name: minio
+    url: https://operator.min.io/
 releases:
   - name: friendly-octo-guacamole
     namespace: "{{ .Environment.Name }}"
@@ -30,17 +32,6 @@ releases:
     createNamespace: true
     chart: ingress-nginx/ingress-nginx
     version: 4.14.1
-  - name: grafana
-    needs:
-      - ingress-nginx/ingress-nginx
-    namespace: central-observability
-    createNamespace: true
-    chart: grafana/grafana
-    version: 10.3.0
-    values:
-      - values/{{ .Environment.Name }}/grafana.yaml
-    secrets:
-      - values/{{ .Environment.Name }}/grafana.sops.yaml
   - name: strimzi-kafka-operator
     namespace: monitoring
     createNamespace: true
@@ -76,3 +67,32 @@ releases:
     version: 0.7.3
     values:
       - values/{{ .Environment.Name }}/kafka-ui.yaml
+  - name: grafana
+    needs:
+      - ingress-nginx/ingress-nginx
+    namespace: central-observability
+    createNamespace: true
+    chart: grafana/grafana
+    version: 10.3.0
+    values:
+      - values/{{ .Environment.Name }}/grafana.yaml
+    secrets:
+      - values/{{ .Environment.Name }}/grafana.sops.yaml
+  - name: minio-operator
+    namespace: central-observability
+    createNamespace: true
+    chart: minio/operator
+    version: 7.1.1
+    values:
+      - values/{{ .Environment.Name }}/minio-operator.yaml
+  - name: minio
+    needs:
+      - minio-operator
+    namespace: central-observability
+    createNamespace: true
+    chart: minio/tenant
+    version: 7.1.1
+    values:
+      - values/{{ .Environment.Name }}/minio.yaml
+    secrets:
+      - values/{{ .Environment.Name }}/minio.sops.yaml
