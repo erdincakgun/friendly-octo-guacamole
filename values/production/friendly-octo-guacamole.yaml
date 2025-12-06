@@ -1,7 +1,7 @@
 replicaCount: 6
 image:
   repository: ghcr.io/erdincakgun/friendly-octo-guacamole
-  tag: "5f39804c581ae573a2dd57bb6e510bdb53a4b5e0"
+  tag: "3c64ec45c67eae54297df07fff4bd5f311b3394b"
 resources:
   limits:
     cpu: 100m
