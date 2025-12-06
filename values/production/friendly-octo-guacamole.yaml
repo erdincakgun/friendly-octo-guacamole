@@ -1,0 +1,26 @@
+replicaCount: 6
+image:
+  repository: ghcr.io/erdincakgun/friendly-octo-guacamole
+  tag: "5f39804c581ae573a2dd57bb6e510bdb53a4b5e0"
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+topologySpreadConstraints:
+  - maxSkew: 2
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: friendly-octo-guacamole

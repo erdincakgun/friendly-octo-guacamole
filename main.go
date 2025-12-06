@@ -133,7 +133,6 @@ func (s *Server) healthHandler(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (s *Server) menuHandler(w http.ResponseWriter, r *http.Request) {
-	// 10% chance of simulated failure for testing monitoring
 	if rand.Float32() < 0.1 {
 		writeError(w, http.StatusInternalServerError, "Failed to fetch menu items from restaurant database")
 		return

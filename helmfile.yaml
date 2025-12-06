@@ -1,0 +1,15 @@
+environments:
+  production:
+    kubeContext: docker-desktop
+---
+repositories:
+  - name: friendly-octo-guacamole
+    url: https://erdincakgun.github.io/friendly-octo-guacamole
+releases:
+  - name: friendly-octo-guacamole
+    namespace: "{{ .Environment.Name }}"
+    createNamespace: true
+    chart: friendly-octo-guacamole/friendly-octo-guacamole
+    version: 1.2.0
+    values:
+      - values/{{ .Environment.Name }}/friendly-octo-guacamole.yaml
