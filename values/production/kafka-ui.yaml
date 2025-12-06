@@ -1,0 +1,16 @@
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  host: kafka-ui.friendly-octo-guacamole.com
+yamlApplicationConfig:
+  kafka:
+    clusters:
+      - name: yaml
+        bootstrapServers: friendly-octo-guacamole-broker-0.friendly-octo-guacamole-kafka-brokers:9092, friendly-octo-guacamole-broker-1.friendly-octo-guacamole-kafka-brokers:9092, friendly-octo-guacamole-broker-2.friendly-octo-guacamole-kafka-brokers:9092
+resources:
+  limits:
+    cpu: 200m
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 512Mi
