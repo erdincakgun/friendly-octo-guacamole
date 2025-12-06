@@ -3,6 +3,9 @@
 helmfile --environment production diff
 helmfile --environment production sync --skip-deps
 
+https://opentelemetry.io/docs/collector/resiliency/
+https://opentelemetry.io/docs/collector/management/
+
 # Food Delivery Platform - SRE Interview Exercise
 
 ## Overview
