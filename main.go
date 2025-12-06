@@ -49,14 +49,31 @@ func NewServer() *Server {
 func writeJSON(w http.ResponseWriter, status int, v interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(v)
+
+	if err := json.NewEncoder(w).Encode(v); err != nil {
+		log.Error().
+			Err(err).
+			Int("status", status).
+			Msg("Failed to encode JSON response")
+	}
 }
 
 func writeError(w http.ResponseWriter, status int, message string) {
-	writeJSON(w, status, map[string]string{
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+
+	errorResponse := map[string]string{
 		"error":   http.StatusText(status),
 		"message": message,
-	})
+	}
+
+	if err := json.NewEncoder(w).Encode(errorResponse); err != nil {
+		log.Error().
+			Err(err).
+			Int("status", status).
+			Str("original_message", message).
+			Msg("Failed to encode error response")
+	}
 }
 
 func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
