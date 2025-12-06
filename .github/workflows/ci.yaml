@@ -37,7 +37,7 @@ jobs:
         with:
           push: true
           tags: |
-            ${{ env.registry }}${{ '/' }}${{ ':' }}${{ github.repository }}${{ ':' }}${{ github.sha }}
+            ${{ env.registry }}${{ '/' }}${{ github.repository }}${{ ':' }}${{ github.sha }}
             ${{ env.registry }}${{ '/' }}${{ github.repository }}${{ ':' }}${{ github.ref_name }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
