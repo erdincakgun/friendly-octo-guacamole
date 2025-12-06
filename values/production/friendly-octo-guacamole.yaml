@@ -18,9 +18,13 @@ readinessProbe:
     path: /health
     port: http
 topologySpreadConstraints:
-  - maxSkew: 2
+  - maxSkew: 1
     topologyKey: kubernetes.io/hostname
     whenUnsatisfiable: DoNotSchedule
     labelSelector:
       matchLabels:
         app.kubernetes.io/name: friendly-octo-guacamole
+    nodeAffinityPolicy: Honor
+    nodeTaintsPolicy: Honor
+service:
+  port: 8080
