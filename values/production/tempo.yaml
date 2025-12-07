@@ -75,10 +75,8 @@ metricsGenerator:
     registry:
       collection_interval: 15s
     processor:
-      service_graphs:
-        enabled: true
-      span_metrics:
-        enabled: true
+      service_graphs: {}
+      span_metrics: {}
     storage:
       path: /var/tempo/wal
       remote_write: []
