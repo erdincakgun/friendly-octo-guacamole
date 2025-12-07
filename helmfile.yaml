@@ -115,3 +115,9 @@ releases:
     version: 3.13.0
     values:
       - values/{{ .Environment.Name }}/metrics-server.yaml
+  - name: open-telemetry-collector
+    namespace: monitoring
+    chart: open-telemetry/opentelemetry-collector
+    version: 0.140.1
+    values:
+      - values/{{ .Environment.Name }}/open-telemetry-collector.yaml
