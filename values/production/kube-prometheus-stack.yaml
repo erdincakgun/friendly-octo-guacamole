@@ -1,0 +1,33 @@
+alertmanager:
+  enabled: false
+grafana:
+  enabled: false
+thanosRuler:
+  enabled: false
+prometheus:
+  prometheusSpec:
+    retention: 168h # 1 week
+    remoteWrite:
+      - url: http://thanos-receive-router.central-observability.svc.cluster.local:19291/api/v1/receive
+        queueConfig:
+          capacity: 40320
+          maxSamplesPerSend: 2880
+          batchSendDeadline: 30s
+          minBackoff: 1s
+          maxBackoff: 5m
+          retryOnRateLimit: true
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 500m
+        memory: 512Mi
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
