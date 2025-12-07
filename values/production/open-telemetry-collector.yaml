@@ -12,6 +12,14 @@ config:
       topic: friendly-octo-guacamole-logs
       encoding: json
       initial_offset: earliest
+  processors:
+    transform:
+      log_statements:
+        - context: log
+          statements:
+            - set(resource.attributes["service.name"], body["kubernetes"]["container_name"])
+            - set(resource.attributes["k8s.namespace.name"], body["kubernetes"]["namespace_name"])
+            - set(resource.attributes["k8s.pod.name"], body["kubernetes"]["pod_name"])
   exporters:
     otlphttp/loki:
       endpoint: http://loki-gateway.central-observability:80/otlp
@@ -34,6 +42,7 @@ config:
           - kafka
         processors:
           - memory_limiter
+          - transform
           - batch
         exporters:
           - otlphttp/loki
