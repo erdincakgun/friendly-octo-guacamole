@@ -3,6 +3,12 @@ image:
   repository: otel/opentelemetry-collector-contrib
 config:
   receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
     kafka:
       brokers:
         - friendly-octo-guacamole-broker-0.friendly-octo-guacamole-kafka-brokers:9092
@@ -11,6 +17,15 @@ config:
       protocol_version: "2.0.0"
       topic: friendly-octo-guacamole-logs
       encoding: json
+      initial_offset: earliest
+    kafka/traces:
+      brokers:
+        - friendly-octo-guacamole-broker-0.friendly-octo-guacamole-kafka-brokers:9092
+        - friendly-octo-guacamole-broker-1.friendly-octo-guacamole-kafka-brokers:9092
+        - friendly-octo-guacamole-broker-2.friendly-octo-guacamole-kafka-brokers:9092
+      protocol_version: "2.0.0"
+      topic: friendly-octo-guacamole-traces
+      encoding: otlp_proto
       initial_offset: earliest
   processors:
     transform:
@@ -32,6 +47,23 @@ config:
         initial_interval: 5s
         max_interval: 30s
         max_elapsed_time: 0
+    kafka/traces:
+      brokers:
+        - friendly-octo-guacamole-broker-0.friendly-octo-guacamole-kafka-brokers:9092
+        - friendly-octo-guacamole-broker-1.friendly-octo-guacamole-kafka-brokers:9092
+        - friendly-octo-guacamole-broker-2.friendly-octo-guacamole-kafka-brokers:9092
+      protocol_version: "2.0.0"
+      topic: friendly-octo-guacamole-traces
+      encoding: otlp_proto
+    otlp/tempo:
+      endpoint: tempo-distributor.central-observability:4317
+      tls:
+        insecure: true
+      retry_on_failure:
+        enabled: true
+        initial_interval: 5s
+        max_interval: 30s
+        max_elapsed_time: 0
   service:
     telemetry:
       logs:
@@ -46,6 +78,22 @@ config:
           - batch
         exporters:
           - otlphttp/loki
+      traces/ingest:
+        receivers:
+          - otlp
+        processors:
+          - memory_limiter
+          - batch
+        exporters:
+          - kafka/traces
+      traces/export:
+        receivers:
+          - kafka/traces
+        processors:
+          - memory_limiter
+          - batch
+        exporters:
+          - otlp/tempo
 resources:
   limits:
     cpu: 200m
