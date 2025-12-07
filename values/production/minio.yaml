@@ -3,9 +3,9 @@ tenant:
   configSecret:
     name: minio-env-configuration
   pools:
-    - servers: 4
+    - servers: 1 # should be 4
       name: pool-0
-      volumesPerServer: 4
+      volumesPerServer: 1 # should be 4
       size: 1Gi
       resources:
         limits:
