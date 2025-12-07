@@ -78,6 +78,7 @@ releases:
       - ingress-nginx/ingress-nginx
       - central-observability/loki
       - central-observability/thanos
+      - central-observability/tempo
     namespace: central-observability
     createNamespace: true
     chart: grafana/grafana
@@ -146,3 +147,13 @@ releases:
       - values/{{ .Environment.Name }}/thanos.yaml
     secrets:
       - values/{{ .Environment.Name }}/thanos.sops.yaml
+  - name: tempo
+    needs:
+      - central-observability/minio
+    namespace: central-observability
+    chart: grafana/tempo-distributed
+    version: 1.57.0
+    values:
+      - values/{{ .Environment.Name }}/tempo.yaml
+    secrets:
+      - values/{{ .Environment.Name }}/tempo.sops.yaml
