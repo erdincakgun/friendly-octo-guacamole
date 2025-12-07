@@ -11,8 +11,7 @@ resources:
     cpu: 200m
     memory: 256Mi
 persistence:
-  enabled: true
-  size: 1Gi
+  enabled: false
 initChownData:
   enabled: false
 grafana.ini:
@@ -45,3 +44,8 @@ datasources:
         isDefault: false
         jsonData:
           timeInterval: 5m
+      - name: Tempo
+        type: tempo
+        url: http://tempo-query-frontend.central-observability.svc.cluster.local:3200
+        access: proxy
+        isDefault: false
