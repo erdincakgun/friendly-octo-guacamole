@@ -76,6 +76,8 @@ releases:
   - name: grafana
     needs:
       - ingress-nginx/ingress-nginx
+      - central-observability/loki
+      - central-observability/thanos
     namespace: central-observability
     createNamespace: true
     chart: grafana/grafana
@@ -104,7 +106,8 @@ releases:
       - values/{{ .Environment.Name }}/minio.sops.yaml
   - name: loki
     needs:
-      - minio
+      - central-observability/minio
+      - monitoring/strimzi-kafka-operator
     namespace: central-observability
     createNamespace: true
     chart: grafana/loki
@@ -126,14 +129,20 @@ releases:
     values:
       - values/{{ .Environment.Name }}/open-telemetry-collector.yaml
   - name: kube-prometheus-stack
+    needs:
+      - central-observability/thanos
     namespace: monitoring
     chart: prometheus-community/kube-prometheus-stack
     version: 79.12.0
     values:
       - values/{{ .Environment.Name }}/kube-prometheus-stack.yaml
   - name: thanos
+    needs:
+      - central-observability/minio
     namespace: central-observability
     chart: stevehipwell/thanos
     version: 1.22.0
     values:
       - values/{{ .Environment.Name }}/thanos.yaml
+    secrets:
+      - values/{{ .Environment.Name }}/thanos.sops.yaml
