@@ -5,13 +5,26 @@ ingress:
     - grafana.friendly-octo-guacamole.com
 resources:
   limits:
-    cpu: 200m
-    memory: 256Mi
+    cpu: 500m
+    memory: 512Mi
   requests:
-    cpu: 200m
-    memory: 256Mi
+    cpu: 500m
+    memory: 512Mi
 persistence:
   enabled: true
   size: 1Gi
 initChownData:
   enabled: false
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Loki
+        type: loki
+        url: http://loki-gateway:80
+        access: proxy
+        isDefault: true
+        jsonData:
+          httpHeaderName1: X-Scope-OrgId
+        secureJsonData:
+          httpHeaderValue1: production
