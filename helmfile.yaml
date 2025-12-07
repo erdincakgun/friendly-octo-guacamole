@@ -38,6 +38,8 @@ releases:
     createNamespace: true
     chart: ingress-nginx/ingress-nginx
     version: 4.14.1
+    values:
+      - values/{{ .Environment.Name }}/ingress-nginx.yaml
   - name: strimzi-kafka-operator
     namespace: monitoring
     createNamespace: true
