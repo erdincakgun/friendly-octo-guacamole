@@ -36,13 +36,15 @@ receive:
   retention: 48h
   ingestor:
     replicas: 1
+    extraArgs:
+      - --tsdb.out-of-order.time-window=24h
     resources:
       limits:
         cpu: 200m
-        memory: 512Mi
+        memory: 1Gi
       requests:
         cpu: 200m
-        memory: 512Mi
+        memory: 1Gi
     persistence:
       enabled: true
       size: 1Gi
