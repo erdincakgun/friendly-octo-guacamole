@@ -62,3 +62,33 @@ spec:
   entityOperator:
     topicOperator: {}
     userOperator: {}
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: friendly-octo-guacamole-logs
+  labels:
+    strimzi.io/cluster: friendly-octo-guacamole
+spec:
+  partitions: 12
+  replicas: 3
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: friendly-octo-guacamole-metrics
+  labels:
+    strimzi.io/cluster: friendly-octo-guacamole
+spec:
+  partitions: 12
+  replicas: 3
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: friendly-octo-guacamole-traces
+  labels:
+    strimzi.io/cluster: friendly-octo-guacamole
+spec:
+  partitions: 12
+  replicas: 3
