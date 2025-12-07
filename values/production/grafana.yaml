@@ -26,8 +26,22 @@ datasources:
         type: loki
         url: http://loki-gateway:80
         access: proxy
-        isDefault: true
+        isDefault: false
         jsonData:
           httpHeaderName1: X-Scope-OrgId
         secureJsonData:
           httpHeaderValue1: production
+      - name: Prometheus
+        type: prometheus
+        url: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+        access: proxy
+        isDefault: false
+        jsonData:
+          timeInterval: 15s
+      - name: Thanos
+        type: prometheus
+        url: http://thanos-query.central-observability.svc.cluster.local:10902
+        access: proxy
+        isDefault: false
+        jsonData:
+          timeInterval: 5m
