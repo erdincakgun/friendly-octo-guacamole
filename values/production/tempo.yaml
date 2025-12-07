@@ -18,6 +18,8 @@ traces:
       enabled: true
 ingester:
   replicas: 1
+  config:
+    replication_factor: 1
   resources:
     limits:
       cpu: 200m
@@ -65,7 +67,29 @@ compactor:
       cpu: 200m
       memory: 256Mi
 metricsGenerator:
-  enabled: false
+  enabled: true
+  config:
+    ring:
+      kvstore:
+        store: memberlist
+    registry:
+      collection_interval: 15s
+    processor:
+      service_graphs:
+        enabled: true
+      span_metrics:
+        enabled: true
+    storage:
+      path: /var/tempo/wal
+      remote_write: []
+  replicas: 1
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
 memcached:
   enabled: false
 cache:
