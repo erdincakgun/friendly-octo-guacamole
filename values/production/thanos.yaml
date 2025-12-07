@@ -1,0 +1,72 @@
+logLevel: warn
+logFormat: json
+compact:
+  enabled: true
+  deduplication:
+    enabled: true
+  extraArgs:
+    - --retention.resolution-raw=0d
+    - --retention.resolution-5m=365d
+    - --retention.resolution-1h=0d
+    - --downsample.concurrency=1
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+  persistence:
+    enabled: true
+    size: 1Gi
+query:
+  enabled: true
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+queryFrontend:
+  enabled: false
+receive:
+  enabled: true
+  replicationFactor: 1
+  retention: 48h
+  ingestor:
+    replicas: 1
+    resources:
+      limits:
+        cpu: 200m
+        memory: 256Mi
+      requests:
+        cpu: 200m
+        memory: 256Mi
+    persistence:
+      enabled: true
+      size: 1Gi
+  router:
+    replicas: 1
+    resources:
+      limits:
+        cpu: 200m
+        memory: 256Mi
+      requests:
+        cpu: 200m
+        memory: 256Mi
+rule:
+  enabled: false
+storeGateway:
+  enabled: true
+  replicas: 1
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+  persistence:
+    enabled: true
+    size: 1Gi
