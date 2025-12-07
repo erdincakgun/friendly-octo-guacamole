@@ -1,0 +1,8 @@
+controller:
+  config:
+    enable-opentelemetry: "true"
+    otlp-collector-host: open-telemetry-collector-opentelemetry-collector.monitoring
+    otlp-collector-port: "4317"
+    otel-service-name: ingress-nginx
+    otel-sampler: AlwaysOn
+    otel-sampler-parent-based: "true"
