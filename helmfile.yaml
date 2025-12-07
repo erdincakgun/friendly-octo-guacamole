@@ -23,6 +23,8 @@ repositories:
     url: https://kubernetes-sigs.github.io/metrics-server/
   - name: prometheus-community
     url: https://prometheus-community.github.io/helm-charts
+  - name: stevehipwell
+    url: https://stevehipwell.github.io/helm-charts/
 releases:
   - name: friendly-octo-guacamole
     namespace: "{{ .Environment.Name }}"
@@ -123,15 +125,15 @@ releases:
     version: 0.140.1
     values:
       - values/{{ .Environment.Name }}/open-telemetry-collector.yaml
-  - name: prometheus-node-exporter
+  - name: kube-prometheus-stack
     namespace: monitoring
-    chart: prometheus-community/prometheus-node-exporter
-    version: 4.49.2
+    chart: prometheus-community/kube-prometheus-stack
+    version: 79.12.0
     values:
-      - values/{{ .Environment.Name }}/prometheus-node-exporter.yaml
-  - name: kube-state-metrics
-    namespace: monitoring
-    chart: prometheus-community/kube-state-metrics
-    version: 6.4.2
+      - values/{{ .Environment.Name }}/kube-prometheus-stack.yaml
+  - name: thanos
+    namespace: central-observability
+    chart: stevehipwell/thanos
+    version: 1.22.0
     values:
-      - values/{{ .Environment.Name }}/kube-state-metrics.yaml
+      - values/{{ .Environment.Name }}/thanos.yaml
