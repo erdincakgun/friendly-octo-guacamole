@@ -1,0 +1,12 @@
+{{- if .Values.configMap }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "friendly-octo-guacamole.fullname" . }}
+  labels:
+    {{- include "friendly-octo-guacamole.labels" . | nindent 4 }}
+data:
+  {{- range $key, $value := .Values.configMap }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+{{- end }}

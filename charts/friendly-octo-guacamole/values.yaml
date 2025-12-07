@@ -137,3 +137,8 @@ topologySpreadConstraints: []
 #   labelSelector:
 #     matchLabels:
 #       app.kubernetes.io/name: friendly-octo-guacamole
+
+# This is for setting up a ConfigMap for environment variables.
+# For more information: https://kubernetes.io/docs/concepts/configuration/configmap/
+configMap: {}
+# OTEL_EXPORTER_OTLP_ENDPOINT: "otel-collector:4317"
