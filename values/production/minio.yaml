@@ -29,6 +29,9 @@ tenant:
     - name: thanos
       objectLock: false
       region: eu-central-1
+    - name: tempo
+      objectLock: false
+      region: eu-central-1
 ingress:
   console:
     enabled: true
