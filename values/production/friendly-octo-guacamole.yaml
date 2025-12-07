@@ -28,3 +28,11 @@ topologySpreadConstraints:
     nodeTaintsPolicy: Honor
 service:
   port: 8080
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: friendly-octo-guacamole.com
+      paths:
+        - path: /
+          pathType: Prefix
