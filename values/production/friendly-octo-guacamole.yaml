@@ -28,6 +28,8 @@ topologySpreadConstraints:
     nodeTaintsPolicy: Honor
 service:
   port: 8080
+configMap:
+  OTEL_EXPORTER_OTLP_ENDPOINT: open-telemetry-collector-opentelemetry-collector.monitoring:4317
 ingress:
   enabled: true
   className: nginx
