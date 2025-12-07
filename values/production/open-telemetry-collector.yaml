@@ -1,0 +1,44 @@
+mode: deployment
+image:
+  repository: otel/opentelemetry-collector-contrib
+config:
+  receivers:
+    kafka:
+      brokers:
+        - friendly-octo-guacamole-broker-0.friendly-octo-guacamole-kafka-brokers:9092
+        - friendly-octo-guacamole-broker-1.friendly-octo-guacamole-kafka-brokers:9092
+        - friendly-octo-guacamole-broker-2.friendly-octo-guacamole-kafka-brokers:9092
+      protocol_version: "2.0.0"
+      topic: friendly-octo-guacamole-logs
+      encoding: raw
+      initial_offset: earliest
+  exporters:
+    otlphttp/loki:
+      endpoint: http://loki-gateway.central-observability:80/otlp
+      headers:
+        X-Scope-OrgId: production
+      sending_queue:
+        enabled: false
+      retry_on_failure:
+        enabled: true
+        initial_interval: 5s
+        max_interval: 30s
+        max_elapsed_time: 0
+  service:
+    telemetry:
+      logs:
+        level: warn
+    pipelines:
+      logs:
+        receivers:
+          - kafka
+        processors:
+          - memory_limiter
+          - batch
+        exporters:
+          - otlphttp/loki
+resources:
+  limits:
+    cpu: 250m
+    memory: 512Mi
+replicaCount: 2
