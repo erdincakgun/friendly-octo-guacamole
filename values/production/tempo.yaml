@@ -1,0 +1,81 @@
+server:
+  logLevel: warn
+  logFormat: json
+storage:
+  trace:
+    backend: s3
+    s3:
+      bucket: tempo
+      endpoint: minio:80
+      region: eu-central-1
+      insecure: true
+      forcepathstyle: true
+traces:
+  otlp:
+    http:
+      enabled: true
+    grpc:
+      enabled: true
+ingester:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 200m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 512Mi
+  persistence:
+    enabled: true
+    size: 1Gi
+distributor:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+querier:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+queryFrontend:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+compactor:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+metricsGenerator:
+  enabled: false
+memcached:
+  enabled: false
+cache:
+  caches: []
+metaMonitoring:
+  serviceMonitor:
+    enabled: false
+  grafanaAgent:
+    enabled: false
+gateway:
+  enabled: false
+minio:
+  enabled: false

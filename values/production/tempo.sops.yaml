@@ -1,0 +1,20 @@
+storage:
+  trace:
+    s3:
+      access_key: ENC[AES256_GCM,data:d+4LJmK2R1qCQvFt7NYrwA==,iv:M9pXRuYyTi7K3H66oJBaB+W8M/PshxmcscEMVf+QOQE=,tag:RRST6VXMCC/rBN803kflQA==,type:str]
+      secret_key: ENC[AES256_GCM,data:v4A22fjWSID82j7gkFqe5g==,iv:aWsIxwtI6trIqT0FLDdqZcUWkwSKHO6HEWQD7IwfcDA=,tag:3pSh5c+En5oFE45+pYnYQg==,type:str]
+sops:
+  age:
+    - recipient: age1s9mjs3cmugth0lzutajzj3wn0g7u8x33070txqwxe8lutguaaquqqej33a
+      enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA5bTRLaFc4cFBzNlo4UTd5
+        d3hQd25DYzVwNHk2S3hhbG9MaFBNVXF0bFJrCkhyb2JFTWJpNWRlSVJneW51WWl3
+        MXhSNW9reUdIMnVFTXVIMElyMUhnTDgKLS0tIDQybWlrUVJtNmhpZEhFVy8wV29Y
+        YTBMR3pHamJNQ0ZzRGFMeG5NNEZMSGcKOG5Fg5BiI3DPL/2P4hRDVW/sNbCTFh/y
+        X67dzKslJjn/ADHlMM+cIyYCA/8wux1EPEXm6ZCun6bG7l3sMZLhxA==
+        -----END AGE ENCRYPTED FILE-----
+  lastmodified: "2025-12-07T21:42:02Z"
+  mac: ENC[AES256_GCM,data:R+aUraAkogYfm7j544cZe1KpEaiPUumBfYW+iwa01aK8yzhUkktjvTtRN9EC50ZvcF69U3odh1G4JKWQKv/n7pZsBxnwMjNSMhoDYQI2A0HXrJVTQfk2MmQstwZLEnkQVYteb9/Q39mkBG3lGHazJ2DQiNKTmVaVsTuZyrgvLu0=,iv:LmpfcHhA9UboAosAJjhARHc+DAkpyxKl9670IbVNCsU=,tag:zIjW/a0Hzsylq4oENESszQ==,type:str]
+  unencrypted_suffix: _unencrypted
+  version: 3.10.2
