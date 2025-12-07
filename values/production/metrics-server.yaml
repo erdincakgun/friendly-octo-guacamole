@@ -4,3 +4,11 @@ defaultArgs:
   - --kubelet-use-node-status-port
   - --metric-resolution=15s
   - --kubelet-insecure-tls
+  - --v=1
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi

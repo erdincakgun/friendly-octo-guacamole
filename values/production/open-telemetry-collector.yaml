@@ -10,7 +10,7 @@ config:
         - friendly-octo-guacamole-broker-2.friendly-octo-guacamole-kafka-brokers:9092
       protocol_version: "2.0.0"
       topic: friendly-octo-guacamole-logs
-      encoding: raw
+      encoding: json
       initial_offset: earliest
   exporters:
     otlphttp/loki:
@@ -39,6 +39,9 @@ config:
           - otlphttp/loki
 resources:
   limits:
-    cpu: 250m
-    memory: 512Mi
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 200m
+    memory: 256Mi
 replicaCount: 2

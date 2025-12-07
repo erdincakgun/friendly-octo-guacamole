@@ -40,14 +40,47 @@ loki:
       s3ForcePathStyle: true
       insecure: true
       http_config: {}
+resultsCache:
+  enabled: false
+chunksCache:
+  enabled: false
 memcached:
   enabled: false
 deploymentMode: SimpleScalable
 backend:
   replicas: 2
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
 read:
   replicas: 2
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
 write:
   replicas: 2
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+gateway:
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
 minio:
   enabled: false

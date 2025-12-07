@@ -5,16 +5,19 @@ ingress:
     - grafana.friendly-octo-guacamole.com
 resources:
   limits:
-    cpu: 500m
-    memory: 512Mi
+    cpu: 200m
+    memory: 256Mi
   requests:
-    cpu: 500m
-    memory: 512Mi
+    cpu: 200m
+    memory: 256Mi
 persistence:
   enabled: true
   size: 1Gi
 initChownData:
   enabled: false
+grafana.ini:
+  log:
+    level: warn
 datasources:
   datasources.yaml:
     apiVersion: 1

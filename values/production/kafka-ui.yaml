@@ -3,6 +3,9 @@ ingress:
   ingressClassName: nginx
   host: kafka-ui.friendly-octo-guacamole.com
 yamlApplicationConfig:
+  logging:
+    level:
+      root: warn
   kafka:
     clusters:
       - name: yaml
@@ -10,7 +13,7 @@ yamlApplicationConfig:
 resources:
   limits:
     cpu: 200m
-    memory: 512Mi
+    memory: 256Mi
   requests:
     cpu: 200m
-    memory: 512Mi
+    memory: 256Mi

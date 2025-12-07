@@ -1,2 +1,9 @@
 operator:
   replicaCount: 1
+  resources:
+    limits:
+      cpu: 100m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
