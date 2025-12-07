@@ -605,7 +605,7 @@ func TestLoggingMiddleware_PassesRequestThrough(t *testing.T) {
 	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		handlerCalled = true
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
+		_, _ = w.Write([]byte("OK"))
 	})
 
 	wrapped := loggingMiddleware(testHandler)
@@ -661,7 +661,7 @@ func TestLoggingMiddleware_CapturesStatusCode(t *testing.T) {
 func TestLoggingMiddleware_DefaultStatusOK(t *testing.T) {
 	// Handler that writes body without explicit WriteHeader
 	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("implicit 200"))
+		_, _ = w.Write([]byte("implicit 200"))
 	})
 
 	wrapped := loggingMiddleware(testHandler)
@@ -721,7 +721,7 @@ func TestIntegration_FullServerRouting(t *testing.T) {
 		if err != nil {
 			t.Fatalf("request failed: %v", err)
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		if resp.StatusCode != http.StatusOK {
 			t.Errorf("expected status %d, got %d", http.StatusOK, resp.StatusCode)
@@ -733,7 +733,7 @@ func TestIntegration_FullServerRouting(t *testing.T) {
 		if err != nil {
 			t.Fatalf("request failed: %v", err)
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		if resp.StatusCode != http.StatusOK {
 			t.Errorf("expected status %d, got %d", http.StatusOK, resp.StatusCode)
@@ -754,7 +754,7 @@ func TestIntegration_FullServerRouting(t *testing.T) {
 		if err != nil {
 			t.Fatalf("request failed: %v", err)
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		if resp.StatusCode != http.StatusNotFound {
 			t.Errorf("expected status %d, got %d", http.StatusNotFound, resp.StatusCode)

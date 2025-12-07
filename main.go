@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -14,7 +15,68 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 )
+
+var tracer = otel.Tracer("github.com/blackswan/mock-go")
+
+func setupOTelSDK(ctx context.Context) (shutdown func(context.Context) error, err error) {
+	var shutdownFuncs []func(context.Context) error
+
+	shutdown = func(ctx context.Context) error {
+		var err error
+		for _, fn := range shutdownFuncs {
+			err = errors.Join(err, fn(ctx))
+		}
+		shutdownFuncs = nil
+		return err
+	}
+
+	handleErr := func(inErr error) {
+		err = errors.Join(inErr, shutdown(ctx))
+	}
+
+	res, err := resource.Merge(
+		resource.Default(),
+		resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceName("friendly-octo-guacamole"),
+			semconv.ServiceVersion("1.0.0"),
+		),
+	)
+	if err != nil {
+		handleErr(err)
+		return
+	}
+
+	traceExporter, err := otlptracegrpc.New(ctx,
+		otlptracegrpc.WithInsecure(),
+	)
+	if err != nil {
+		handleErr(err)
+		return
+	}
+
+	tracerProvider := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(traceExporter, sdktrace.WithBatchTimeout(time.Second)),
+		sdktrace.WithResource(res),
+	)
+	shutdownFuncs = append(shutdownFuncs, tracerProvider.Shutdown)
+	otel.SetTracerProvider(tracerProvider)
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
+		propagation.TraceContext{},
+		propagation.Baggage{},
+	))
+
+	return
+}
 
 type MenuItem struct {
 	ID          string  `json:"id"`
@@ -133,7 +195,12 @@ func (s *Server) healthHandler(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (s *Server) menuHandler(w http.ResponseWriter, r *http.Request) {
+	_, span := tracer.Start(r.Context(), "fetchMenuItems")
+	defer span.End()
+
 	if rand.Float32() < 0.1 {
+		span.SetAttributes(attribute.Bool("error", true))
+		span.RecordError(errors.New("database connection failed"))
 		writeError(w, http.StatusInternalServerError, "Failed to fetch menu items from restaurant database")
 		return
 	}
@@ -143,6 +210,7 @@ func (s *Server) menuHandler(w http.ResponseWriter, r *http.Request) {
 		menuList = append(menuList, item)
 	}
 
+	span.SetAttributes(attribute.Int("menu.count", len(menuList)))
 	_ = writeJSON(w, http.StatusOK, map[string]interface{}{
 		"menu_items": menuList,
 		"count":      len(menuList),
@@ -150,36 +218,70 @@ func (s *Server) menuHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) menuItemByIDHandler(w http.ResponseWriter, r *http.Request) {
+	_, span := tracer.Start(r.Context(), "fetchMenuItemByID")
+	defer span.End()
+
 	menuItemID := strings.TrimSpace(strings.TrimPrefix(r.URL.Path, "/api/menu/"))
+	span.SetAttributes(attribute.String("menu.item.id", menuItemID))
 
 	if menuItemID == "" {
+		span.SetAttributes(attribute.Bool("error", true))
 		writeError(w, http.StatusBadRequest, "Menu item ID is required")
 		return
 	}
 
 	menuItem, exists := s.menuItems[menuItemID]
 	if !exists {
+		span.SetAttributes(attribute.Bool("error", true))
+		span.RecordError(fmt.Errorf("menu item not found: %s", menuItemID))
 		writeError(w, http.StatusNotFound, fmt.Sprintf("Menu item with ID '%s' not found", menuItemID))
 		return
 	}
 
+	span.SetAttributes(
+		attribute.String("menu.item.name", menuItem.Name),
+		attribute.Float64("menu.item.price", menuItem.Price),
+	)
 	_ = writeJSON(w, http.StatusOK, map[string]interface{}{
 		"menu_item": menuItem,
 	})
 }
 
+func newHTTPHandler(server *Server) http.Handler {
+	mux := http.NewServeMux()
+
+	handleFunc := func(pattern string, handlerFunc func(http.ResponseWriter, *http.Request)) {
+		handler := otelhttp.WithRouteTag(pattern, http.HandlerFunc(handlerFunc))
+		mux.Handle(pattern, handler)
+	}
+
+	handleFunc("/health", server.healthHandler)
+	handleFunc("/api/menu", server.menuHandler)
+	handleFunc("/api/menu/", server.menuItemByIDHandler)
+
+	return otelhttp.NewHandler(mux, "/")
+}
+
 func main() {
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
-	server := NewServer()
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/health", server.healthHandler)
-	mux.HandleFunc("/api/menu", server.menuHandler)
-	mux.HandleFunc("/api/menu/", server.menuItemByIDHandler)
+	ctx := context.Background()
+	otelShutdown, err := setupOTelSDK(ctx)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to setup OpenTelemetry SDK")
+	}
+	defer func() {
+		if err := otelShutdown(ctx); err != nil {
+			log.Error().Err(err).Msg("Failed to shutdown OpenTelemetry SDK")
+		}
+	}()
+
+	server := NewServer()
+	handler := newHTTPHandler(server)
 
 	httpServer := &http.Server{
 		Addr:         ":8080",
-		Handler:      loggingMiddleware(mux),
+		Handler:      loggingMiddleware(handler),
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  60 * time.Second,
@@ -199,10 +301,10 @@ func main() {
 
 	log.Info().Msg("Shutting down server...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if err := httpServer.Shutdown(ctx); err != nil {
+	if err := httpServer.Shutdown(shutdownCtx); err != nil {
 		log.Fatal().Err(err).Msg("Server forced to shutdown")
 	}
 
