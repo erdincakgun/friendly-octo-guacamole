@@ -10,21 +10,12 @@ tenant:
       resources:
         limits:
           cpu: 200m
-          memory: 256Mi
+          memory: 512Mi
         requests:
           cpu: 200m
-          memory: 256Mi
+          memory: 512Mi
   certificate:
     requestAutoCert: false
-ingress:
-  console:
-    enabled: true
-    ingressClassName: nginx
-    host: minio-console.friendly-octo-guacamole.com
-  api:
-    enabled: true
-    ingressClassName: nginx
-    host: minio.friendly-octo-guacamole.com
   buckets:
     - name: friendly-octo-guacamole-loki-chunks
       objectLock: false
@@ -35,3 +26,15 @@ ingress:
     - name: friendly-octo-guacamole-loki-admin
       objectLock: false
       region: eu-central-1
+    - name: thanos
+      objectLock: false
+      region: eu-central-1
+ingress:
+  console:
+    enabled: true
+    ingressClassName: nginx
+    host: minio-console.friendly-octo-guacamole.com
+  api:
+    enabled: true
+    ingressClassName: nginx
+    host: minio.friendly-octo-guacamole.com
