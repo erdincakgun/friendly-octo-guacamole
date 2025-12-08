@@ -43,7 +43,6 @@ A proof-of-concept implementation of a centralized observability platform for a 
 helmfile --environment production diff
 
 # Apply changes
-
 helmfile --environment production apply --skip-deps
 
 # Deploy everything
