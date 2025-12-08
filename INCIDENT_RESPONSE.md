@@ -13,4 +13,25 @@
 - Which endpoint or endpoints can be called to initiate a payment transaction? -> order service team
 - Is there a maintenance page ready to use? -> mobile app team
 
-1. The incident is resolved. You are now facilitating the **Postmortem** meeting. We don't want to rely on Customer Support to tell us the site is broken next time. What specific **Action Items** regarding **Alerting** or **SLIs** would you assign to the engineering teams to ensure we detect this specific scenario instantly in the future?
+4. The incident is resolved. You are now facilitating the **Postmortem** meeting. We don't want to rely on Customer Support to tell us the site is broken next time. What specific **Action Items** regarding **Alerting** or **SLIs** would you assign to the engineering teams to ensure we detect this specific scenario instantly in the future?
+
+SLIs:
+
+- Order Success Rate: Track correlation between "payment charged" events and "restaurant received order" events. Alert when ratio drops below 99% over 5 minutes.
+- Consumer Processing Success Rate: Measure messages consumed vs messages successfully processed (written to DB). These numbers must match.
+
+Alerts:
+
+- DLQ depth > 0 for 2 minutes → P1 page
+- Discrepancy between order service order count and restaurant service order count > 10 in 15 minutes → P1 page
+
+Action Items:
+
+| Action                                                                    | Owner                   | Priority |
+| ------------------------------------------------------------------------- | ----------------------- | -------- |
+| Implement order success rate SLI with tracing                             | Order Service Team      | P0       |
+| Add DLQ monitoring and alerting                                           | Platform Team           | P0       |
+| Create reconciliation job between Order and Restaurant DBs                | Data Engineering        | P1       |
+| Instrument consumer to emit processing success/failure metrics            | Restaurant Service Team | P1       |
+| Collect metrics and traces from restaurant tablet application             | Mobile Team             | P2       |
+| Add external dependency health checks (SSL certs, tokens, DB connections) | Platform Team           | P2       |
