@@ -49,3 +49,582 @@ datasources:
         url: http://tempo-query-frontend.central-observability.svc.cluster.local:3200
         access: proxy
         isDefault: false
+        jsonData:
+          tracesToLogsV2:
+            datasourceUid: Loki
+            filterByTraceID: false
+            filterBySpanID: false
+          nodeGraph:
+            enabled: true
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+      - name: default
+        orgId: 1
+        folder: ""
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/default
+dashboards:
+  default:
+    menu-api-unified:
+      json: |
+        {
+          "annotations": {
+            "list": [
+              {
+                "builtIn": 1,
+                "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+              }
+            ]
+          },
+          "description": "Menu API Dashboard - Customer Experience, Business, and Technical Views",
+          "editable": true,
+          "fiscalYearStartMonth": 0,
+          "graphTooltip": 1,
+          "panels": [
+            {
+              "collapsed": false,
+              "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+              "id": 1,
+              "panels": [],
+              "title": "Customer Experience",
+              "type": "row"
+            },
+            {
+              "datasource": { "type": "loki", "uid": "Loki" },
+              "description": "Percentage of successful requests (non-5xx)",
+              "fieldConfig": {
+                "defaults": {
+                  "color": { "mode": "thresholds" },
+                  "mappings": [],
+                  "max": 100,
+                  "min": 0,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "color": "red", "value": null },
+                      { "color": "yellow", "value": 95 },
+                      { "color": "green", "value": 99 }
+                    ]
+                  },
+                  "unit": "percent"
+                },
+                "overrides": []
+              },
+              "gridPos": { "h": 6, "w": 6, "x": 0, "y": 1 },
+              "id": 2,
+              "options": {
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "auto",
+                "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true
+              },
+              "targets": [
+                {
+                  "datasource": { "type": "loki", "uid": "Loki" },
+                  "expr": "100 - (sum(count_over_time({service_name=\"friendly-octo-guacamole\"} | json | status >= 500 [$__range])) / sum(count_over_time({service_name=\"friendly-octo-guacamole\"} | json | status > 0 [$__range])) * 100)",
+                  "refId": "A"
+                }
+              ],
+              "title": "Service Availability",
+              "type": "gauge"
+            },
+            {
+              "datasource": { "type": "loki", "uid": "Loki" },
+              "description": "Percentage of requests returning errors (5xx)",
+              "fieldConfig": {
+                "defaults": {
+                  "color": { "mode": "thresholds" },
+                  "mappings": [],
+                  "max": 100,
+                  "min": 0,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "color": "green", "value": null },
+                      { "color": "yellow", "value": 1 },
+                      { "color": "red", "value": 5 }
+                    ]
+                  },
+                  "unit": "percent"
+                },
+                "overrides": []
+              },
+              "gridPos": { "h": 6, "w": 6, "x": 6, "y": 1 },
+              "id": 3,
+              "options": {
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "auto",
+                "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true
+              },
+              "targets": [
+                {
+                  "datasource": { "type": "loki", "uid": "Loki" },
+                  "expr": "sum(count_over_time({service_name=\"friendly-octo-guacamole\"} | json | status >= 500 [$__range])) / sum(count_over_time({service_name=\"friendly-octo-guacamole\"} | json | status > 0 [$__range])) * 100",
+                  "refId": "A"
+                }
+              ],
+              "title": "Error Rate",
+              "type": "gauge"
+            },
+            {
+              "datasource": { "type": "loki", "uid": "Loki" },
+              "description": "Average response time in milliseconds",
+              "fieldConfig": {
+                "defaults": {
+                  "color": { "mode": "thresholds" },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "color": "green", "value": null },
+                      { "color": "yellow", "value": 100 },
+                      { "color": "red", "value": 500 }
+                    ]
+                  },
+                  "unit": "ms"
+                },
+                "overrides": []
+              },
+              "gridPos": { "h": 6, "w": 6, "x": 12, "y": 1 },
+              "id": 4,
+              "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": { "calcs": ["mean"], "fields": "", "values": false },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+              },
+              "targets": [
+                {
+                  "datasource": { "type": "loki", "uid": "Loki" },
+                  "expr": "avg_over_time({service_name=\"friendly-octo-guacamole\"} | json | path != \"/health\" | unwrap duration | __error__=\"\" [$__range])",
+                  "refId": "A"
+                }
+              ],
+              "title": "Avg Response Time",
+              "type": "stat"
+            },
+            {
+              "datasource": { "type": "loki", "uid": "Loki" },
+              "description": "Total requests in time range",
+              "fieldConfig": {
+                "defaults": {
+                  "color": { "mode": "thresholds" },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [{ "color": "blue", "value": null }]
+                  },
+                  "unit": "short"
+                },
+                "overrides": []
+              },
+              "gridPos": { "h": 6, "w": 6, "x": 18, "y": 1 },
+              "id": 5,
+              "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+              },
+              "targets": [
+                {
+                  "datasource": { "type": "loki", "uid": "Loki" },
+                  "expr": "sum(count_over_time({service_name=\"friendly-octo-guacamole\"} | json | status > 0 [$__range]))",
+                  "refId": "A"
+                }
+              ],
+              "title": "Total Requests",
+              "type": "stat"
+            },
+            {
+              "collapsed": false,
+              "gridPos": { "h": 1, "w": 24, "x": 0, "y": 7 },
+              "id": 6,
+              "panels": [],
+              "title": "Business Metrics",
+              "type": "row"
+            },
+            {
+              "datasource": { "type": "loki", "uid": "Loki" },
+              "description": "Requests per minute over time",
+              "fieldConfig": {
+                "defaults": {
+                  "color": { "mode": "palette-classic" },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 20,
+                    "gradientMode": "none",
+                    "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+                    "insertNulls": false,
+                    "lineInterpolation": "smooth",
+                    "lineWidth": 2,
+                    "pointSize": 5,
+                    "scaleDistribution": { "type": "linear" },
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "stacking": { "group": "A", "mode": "none" },
+                    "thresholdsStyle": { "mode": "off" }
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [{ "color": "green", "value": null }]
+                  },
+                  "unit": "reqpm"
+                },
+                "overrides": []
+              },
+              "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+              "id": 7,
+              "options": {
+                "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+                "tooltip": { "mode": "multi", "sort": "desc" }
+              },
+              "targets": [
+                {
+                  "datasource": { "type": "loki", "uid": "Loki" },
+                  "expr": "sum(count_over_time({service_name=\"friendly-octo-guacamole\"} | json | path =~ \"/api/menu.*\" [1m]))",
+                  "legendFormat": "Menu API Requests",
+                  "refId": "A"
+                }
+              ],
+              "title": "Request Volume (Menu API)",
+              "type": "timeseries"
+            },
+            {
+              "datasource": { "type": "loki", "uid": "Loki" },
+              "description": "Percentage of successful Menu API requests (non-4xx/5xx)",
+              "fieldConfig": {
+                "defaults": {
+                  "color": { "mode": "thresholds" },
+                  "mappings": [],
+                  "max": 100,
+                  "min": 0,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "color": "red", "value": null },
+                      { "color": "yellow", "value": 90 },
+                      { "color": "green", "value": 98 }
+                    ]
+                  },
+                  "unit": "percent"
+                },
+                "overrides": []
+              },
+              "gridPos": { "h": 8, "w": 6, "x": 12, "y": 8 },
+              "id": 8,
+              "options": {
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "auto",
+                "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true
+              },
+              "targets": [
+                {
+                  "datasource": { "type": "loki", "uid": "Loki" },
+                  "expr": "sum(count_over_time({service_name=\"friendly-octo-guacamole\"} | json | status < 400 | path =~ \"/api/menu.*\" [$__range])) / sum(count_over_time({service_name=\"friendly-octo-guacamole\"} | json | status > 0 | path =~ \"/api/menu.*\" [$__range])) * 100",
+                  "refId": "A"
+                }
+              ],
+              "title": "Menu Success Rate",
+              "type": "gauge"
+            },
+            {
+              "datasource": { "type": "loki", "uid": "Loki" },
+              "description": "Request count by endpoint path",
+              "fieldConfig": {
+                "defaults": {
+                  "color": { "mode": "thresholds" },
+                  "custom": {
+                    "align": "auto",
+                    "cellOptions": { "type": "auto" },
+                    "inspect": false
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [{ "color": "green", "value": null }]
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": { "id": "byName", "options": "Endpoint" },
+                    "properties": [{ "id": "custom.width", "value": 150 }]
+                  },
+                  {
+                    "matcher": { "id": "byName", "options": "Requests" },
+                    "properties": [
+                      { "id": "custom.cellOptions", "value": { "mode": "gradient", "type": "gauge" } },
+                      { "id": "color", "value": { "mode": "continuous-BlYlRd" } }
+                    ]
+                  }
+                ]
+              },
+              "gridPos": { "h": 8, "w": 6, "x": 18, "y": 8 },
+              "id": 9,
+              "options": {
+                "cellHeight": "sm",
+                "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false },
+                "showHeader": true,
+                "sortBy": [{ "desc": true, "displayName": "Requests" }]
+              },
+              "targets": [
+                {
+                  "datasource": { "type": "loki", "uid": "Loki" },
+                  "expr": "sum by (path) (count_over_time({service_name=\"friendly-octo-guacamole\"} | json | path != \"\" | path != \"/health\" [$__range]))",
+                  "legendFormat": "{{path}}",
+                  "refId": "A"
+                }
+              ],
+              "title": "Requests by Endpoint",
+              "transformations": [
+                {
+                  "id": "reduce",
+                  "options": { "reducers": ["lastNotNull"] }
+                },
+                {
+                  "id": "organize",
+                  "options": {
+                    "renameByName": { "Field": "Endpoint", "Last *": "Requests" }
+                  }
+                }
+              ],
+              "type": "table"
+            },
+            {
+              "collapsed": false,
+              "gridPos": { "h": 1, "w": 24, "x": 0, "y": 16 },
+              "id": 10,
+              "panels": [],
+              "title": "Technical Details",
+              "type": "row"
+            },
+            {
+              "datasource": { "type": "loki", "uid": "Loki" },
+              "description": "HTTP response status codes over time",
+              "fieldConfig": {
+                "defaults": {
+                  "color": { "mode": "palette-classic" },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "bars",
+                    "fillOpacity": 80,
+                    "gradientMode": "none",
+                    "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+                    "insertNulls": false,
+                    "lineInterpolation": "linear",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": { "type": "linear" },
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "stacking": { "group": "A", "mode": "normal" },
+                    "thresholdsStyle": { "mode": "off" }
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [{ "color": "green", "value": null }]
+                  },
+                  "unit": "short"
+                },
+                "overrides": [
+                  {
+                    "matcher": { "id": "byRegexp", "options": "2.." },
+                    "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }]
+                  },
+                  {
+                    "matcher": { "id": "byRegexp", "options": "4.." },
+                    "properties": [{ "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }]
+                  },
+                  {
+                    "matcher": { "id": "byRegexp", "options": "5.." },
+                    "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
+                  }
+                ]
+              },
+              "gridPos": { "h": 8, "w": 12, "x": 0, "y": 17 },
+              "id": 11,
+              "options": {
+                "legend": { "calcs": ["sum"], "displayMode": "table", "placement": "right", "showLegend": true },
+                "tooltip": { "mode": "multi", "sort": "desc" }
+              },
+              "targets": [
+                {
+                  "datasource": { "type": "loki", "uid": "Loki" },
+                  "expr": "sum by (status) (count_over_time({service_name=\"friendly-octo-guacamole\"} | json | status > 0 | path != \"/health\" [1m]))",
+                  "legendFormat": "{{status}}",
+                  "refId": "A"
+                }
+              ],
+              "title": "HTTP Status Codes",
+              "type": "timeseries"
+            },
+            {
+              "datasource": { "type": "loki", "uid": "Loki" },
+              "description": "Response time distribution over time",
+              "fieldConfig": {
+                "defaults": {
+                  "color": { "mode": "palette-classic" },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 20,
+                    "gradientMode": "none",
+                    "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+                    "insertNulls": false,
+                    "lineInterpolation": "smooth",
+                    "lineWidth": 2,
+                    "pointSize": 5,
+                    "scaleDistribution": { "type": "linear" },
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "stacking": { "group": "A", "mode": "none" },
+                    "thresholdsStyle": { "mode": "off" }
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [{ "color": "green", "value": null }]
+                  },
+                  "unit": "ms"
+                },
+                "overrides": []
+              },
+              "gridPos": { "h": 8, "w": 12, "x": 12, "y": 17 },
+              "id": 12,
+              "options": {
+                "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+                "tooltip": { "mode": "multi", "sort": "desc" }
+              },
+              "targets": [
+                {
+                  "datasource": { "type": "loki", "uid": "Loki" },
+                  "expr": "avg_over_time({service_name=\"friendly-octo-guacamole\"} | json | path != \"/health\" | unwrap duration | __error__=\"\" [1m])",
+                  "legendFormat": "Avg",
+                  "refId": "A"
+                },
+                {
+                  "datasource": { "type": "loki", "uid": "Loki" },
+                  "expr": "max_over_time({service_name=\"friendly-octo-guacamole\"} | json | path != \"/health\" | unwrap duration | __error__=\"\" [1m])",
+                  "legendFormat": "Max",
+                  "refId": "B"
+                }
+              ],
+              "title": "Response Time",
+              "type": "timeseries"
+            },
+            {
+              "datasource": { "type": "loki", "uid": "Loki" },
+              "description": "Recent error logs from the service",
+              "gridPos": { "h": 8, "w": 24, "x": 0, "y": 25 },
+              "id": 13,
+              "options": {
+                "dedupStrategy": "none",
+                "enableLogDetails": true,
+                "prettifyLogMessage": true,
+                "showCommonLabels": false,
+                "showLabels": false,
+                "showTime": true,
+                "sortOrder": "Descending",
+                "wrapLogMessage": false
+              },
+              "targets": [
+                {
+                  "datasource": { "type": "loki", "uid": "Loki" },
+                  "expr": "{service_name=\"friendly-octo-guacamole\"} | json | level = \"error\" or status >= 500",
+                  "refId": "A"
+                }
+              ],
+              "title": "Error Logs",
+              "type": "logs"
+            },
+            {
+              "collapsed": false,
+              "gridPos": { "h": 1, "w": 24, "x": 0, "y": 33 },
+              "id": 14,
+              "panels": [],
+              "title": "Distributed Tracing",
+              "type": "row"
+            },
+            {
+              "datasource": { "type": "tempo", "uid": "P214B5B846CF3925F" },
+              "description": "Recent traces from the Menu API",
+              "gridPos": { "h": 10, "w": 24, "x": 0, "y": 34 },
+              "id": 15,
+              "targets": [
+                {
+                  "datasource": { "type": "tempo", "uid": "P214B5B846CF3925F" },
+                  "filters": [
+                    {
+                      "id": "service-name",
+                      "operator": "=",
+                      "scope": "resource",
+                      "tag": "service.name",
+                      "value": ["friendly-octo-guacamole"],
+                      "valueType": "string"
+                    }
+                  ],
+                  "limit": 20,
+                  "queryType": "traceqlSearch",
+                  "refId": "A",
+                  "tableType": "traces"
+                }
+              ],
+              "title": "Recent Traces",
+              "type": "traces"
+            }
+          ],
+          "refresh": "30s",
+          "schemaVersion": 40,
+          "tags": ["menu-api", "sre", "business"],
+          "templating": { "list": [] },
+          "time": { "from": "now-1h", "to": "now" },
+          "timepicker": {},
+          "timezone": "browser",
+          "title": "Menu API - Unified Dashboard",
+          "uid": "menu-api-unified",
+          "version": 1
+        }
